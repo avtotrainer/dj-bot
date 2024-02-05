@@ -1,6 +1,7 @@
 import os
 import django
 import telebot
+from telebot import types
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bot.settings')
 django.setup()
@@ -65,6 +66,33 @@ def list_all_statuses(message):
     response += "\n".join([f"ID: {status.id}, Статус: {status.status}" for status in statuses])
 
     bot.reply_to(message, response)
+
+@bot.message_handler(commands=['button'])
+def send_welcome(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    button = types.KeyboardButton("Нажми на меня")
+    markup.add(button)
+    bot.send_message(message.chat.id, "Выберите опцию:", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    if message.text == "Нажми на меня":
+        bot.reply_to(message, "Вы нажали на кнопку!")
+
+
+@bot.message_handler(commands=['button_inline'])
+def send_welcome(message):
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton("Нажми на меня", callback_data="test")
+    markup.add(button)
+    bot.send_message(message.chat.id, "Привет! Это тестовая кнопка:", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: True)
+def query_handler(call):
+    if call.data == "test":
+        bot.answer_callback_query(callback_query_id=call.id, text="Вы нажали на кнопку!")
+        bot.send_message(call.message.chat.id, "Вы выбрали 'Нажми на меня'")
+
 
 
 bot.polling()
