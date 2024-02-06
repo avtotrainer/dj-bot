@@ -32,6 +32,7 @@ def generate_visit_schedule(start_time, end_time, visit_duration, break_start_ti
 
 # Пример использования
 start_time = '09:00'
+print(datetime.strptime(start_time, '%H:%M'))
 end_time = '18:00'
 visit_duration = timedelta(minutes=45)
 break_start_time = '12:00'
@@ -39,8 +40,11 @@ break_duration = timedelta(hours=1)
 
 visit_schedule = generate_visit_schedule(start_time, end_time, visit_duration, break_start_time, break_duration)
 
-formatted_times = [dt.strftime("%H:%M") for dt in visit_schedule]
+"""
+formatted_schedules = []
+for schedule in visit_schedule:
+    formatted_times = [dt.strftime("%H:%M") for dt in schedule]
+    formatted_schedules.append(formatted_times)
 
-for visit in formatted_times:
-    print(visit)
-
+print(formatted_schedules)
+"""

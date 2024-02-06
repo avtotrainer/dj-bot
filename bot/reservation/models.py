@@ -54,13 +54,14 @@ class Visit(models.Model):
     client = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='visits_as_client')
     specialist = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='visits_as_specialist')
     service = models.ForeignKey(Service, on_delete=models.CASCADE)  # Ссылка на модель Service
-    visit_time = models.DateTimeField()
+    visit_time = models.DateTimeField(blank=True, null=True)
     prepayment_made = models.BooleanField(default=False)  # Добавлено поле для предоплаты
+    visit_completed = models.BooleanField(default=False)  # ვიზიტი დასრულებულია
 
     def __str__(self):
         prepayment_status = "с предоплатой" if self.prepayment_made else "без предоплаты"
-        return f"{self.client.name} - {self.service.name} - {self.visit_time.strftime('%Y-%m-%d %H:%M')}"
-
+        return f"{self.client.name} - {self.specialist.name} - {self.service.name}"
+# - {self.visit_time.strftime('%Y-%m-%d %H:%M')}
 class CompletedService(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     client = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='completed_services_as_client')

@@ -2,7 +2,8 @@ import os
 import django
 import telebot
 from telebot import types
-
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from datetime import datetime, timedelta
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bot.settings')
 django.setup()
 
@@ -13,6 +14,36 @@ message_registred = BotSetting.objects.get(name='message_registred').value
 message_registration = BotSetting.objects.get(name='message_registration').value
 #bot = telebot.TeleBot("6785734167:AAENBclXa3ufO638knZoZh-xrHWhoE_24is")  # Замените на токен вашего бота
 bot = telebot.TeleBot(bot_token)  # Замените на токен вашего бота
+
+
+@bot.message_handler(commands=['book'])
+def send_date_keyboard(message):
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+    # Добавляем "ненажимаемую" кнопку с текстом "Выберите день"
+    markup.row(KeyboardButton("Выберите день", request_contact=False, request_location=False))
+    # Создаем список для кнопок
+    buttons = []
+    
+    # Генерируем кнопки для следующих пяти дней
+    for i in range(5):
+        date = datetime.now() + timedelta(days=i)
+        button_text = date.strftime('%d')  # Текст кнопки - только число месяца
+        buttons.append(KeyboardButton(button_text))
+    
+    # Добавляем все кнопки в один ряд
+    markup.row(*buttons)
+    # Отправляем сообщение с кастомной клавиатурой
+    bot.send_message(message.chat.id, "Используйте клавиатуру ниже для выбора:", reply_markup=markup)
+@bot.message_handler(func=lambda message: message.text.isdigit() and int(message.text) in range(1, 32))
+def handle_date_selection(message):
+    # Проверяем, является ли текст сообщения числом и находится ли в допустимом диапазоне
+    date = datetime.now() + timedelta(days=int(message.text) - datetime.now().day)
+    bot.reply_to(message, f"Вы выбрали дату: {date.strftime('%Y-%m-%d')}", reply_markup=ReplyKeyboardRemove())
+
+@bot.message_handler(func=lambda message: message.text == "Выберите")
+def do_nothing(message):
+    # Ничего не делаем при нажатии на кнопку-заголовок
+    pass
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -67,10 +98,26 @@ def list_all_statuses(message):
 
     bot.reply_to(message, response)
 
+@bot.message_handler(commands=['nbut'])
+def inlin_welcome(message):
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton("Нажми на меня",callback_data="test", url="https://google.com")
+    button1 = types.InlineKeyboardButton("Нажми на меня", url="https://google.com")
+    markup.add(button, button1)
+    bot.send_message(message.chat.id, "Привет! Это тестовая кнопка:", reply_markup=markup)
+"""
+@bot.callback_query_handler(func=lambda call: True)
+def query_handler(call):
+    if call.data == "test":
+        bot.answer_callback_query(callback_query_id=call.id, text="Вы нажали на кнопку!")
+        bot.send_message(call.message.chat.id, "Вы выбрали 'Нажми на меня'")
+
+"""
 @bot.message_handler(commands=['button'])
-def send_welcome(message):
+def reply_dwelcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    button = types.KeyboardButton("Нажми на меня")
+    button = types.KeyboardButton("შემეხე")
+    button = types.KeyboardButton("არ შემეხო")
     markup.add(button)
     bot.send_message(message.chat.id, "Выберите опцию:", reply_markup=markup)
 
@@ -78,20 +125,6 @@ def send_welcome(message):
 def echo_all(message):
     if message.text == "Нажми на меня":
         bot.reply_to(message, "Вы нажали на кнопку!")
-
-
-@bot.message_handler(commands=['button_inline'])
-def send_welcome(message):
-    markup = types.InlineKeyboardMarkup()
-    button = types.InlineKeyboardButton("Нажми на меня", callback_data="test")
-    markup.add(button)
-    bot.send_message(message.chat.id, "Привет! Это тестовая кнопка:", reply_markup=markup)
-
-@bot.callback_query_handler(func=lambda call: True)
-def query_handler(call):
-    if call.data == "test":
-        bot.answer_callback_query(callback_query_id=call.id, text="Вы нажали на кнопку!")
-        bot.send_message(call.message.chat.id, "Вы выбрали 'Нажми на меня'")
 
 
 

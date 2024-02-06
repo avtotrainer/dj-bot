@@ -24,8 +24,8 @@ class ServiceAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 class VisitAdmin(admin.ModelAdmin):
-    list_display = ('client', 'specialist', 'visit_time', 'service', 'prepayment_made')
-    list_filter = ('visit_time', 'service', 'prepayment_made')
+    list_display = ('client', 'specialist', 'visit_time', 'service', 'prepayment_made','visit_completed')
+    list_filter = ('visit_time', 'service', 'prepayment_made', 'visit_completed')
     search_fields = ('client__name', 'specialist__name', 'service__name')
 
 class CompletedServiceAdmin(admin.ModelAdmin):
